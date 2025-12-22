@@ -1,0 +1,24 @@
+### Get All Roles
+GET http://localhost:3000/api/roles
+
+### Create New Role
+POST http://localhost:3000/api/roles
+Content-Type: application/json
+
+{
+    "name": "Admin"
+}
+
+### Get Role by ID (เปลี่ยนเลข ID ตามจริง)
+GET http://localhost:3000/api/roles/1
+
+### Update Role
+PUT http://localhost:3000/api/roles/1
+Content-Type: application/json
+
+{
+    "name": "Super Admin"
+}
+
+### Delete Role
+DELETE http://localhost:3000/api/roles/1

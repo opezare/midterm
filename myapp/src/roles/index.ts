@@ -1,78 +1,67 @@
 import { Hono } from 'hono'
 import * as z from 'zod'
 import { zValidator } from '@hono/zod-validator'
-import db from '../db/index.js' // ตรวจสอบ path ให้ตรงกับโปรเจกต์คุณ
+import db from '../db/index.js'
 
-const rolesRoutes = new Hono()
+const api = new Hono()
 
-type Role = {
-  id: number;
-  name: string;
-}
-
-// Schema สำหรับตรวจสอบข้อมูล (Validation)
-const createRoleSchema = z.object({
-  name: z.string().min(1, "กรุณากรอกชื่อ Role")
+// กำหนดเงื่อนไข: ชื่อต้องเป็นตัวอักษร 2 ตัวขึ้นไป
+const roleSchema = z.object({
+  name: z.string().min(2, "ชื่อต้องมีความยาวอย่างน้อย 2 ตัวอักษร")
 })
 
-// 1. Get all roles
-rolesRoutes.get('/', (c) => {
-  const sql = 'SELECT * FROM roles'
-  const stmt = db.prepare(sql)
-  const roles = stmt.all()
-  return c.json({ message: 'list of Roles', data: roles })
+// [GET] ดึงข้อมูลทั้งหมด
+api.get('/', (c) => {
+  const rows = db.prepare('SELECT * FROM roles ORDER BY id DESC').all()
+  return c.json({
+    success: true,
+    count: rows.length,
+    data: rows
+  })
 })
 
-// 2. Get role by ID
-rolesRoutes.get('/:id', (c) => {
-  const id = c.req.param('id')
-  const sql = 'SELECT * FROM roles WHERE id = ?'
-  const role = db.prepare(sql).get(id)
-
-  if (!role) {
-    return c.json({ message: 'Role not found' }, 404)
-  }
-  return c.json({ message: `Role details for ID: ${id}`, data: role })
-})
-
-// 3. Create new role
-rolesRoutes.post('/', zValidator('json', createRoleSchema), (c) => {
-  const body = c.req.valid('json')
+// [POST] เพิ่มข้อมูลใหม่ พร้อมระบบดักจับชื่อซ้ำ
+api.post('/', zValidator('json', roleSchema), (c) => {
+  const { name } = c.req.valid('json')
   
   try {
-    const sql = 'INSERT INTO roles (name) VALUES (?)'
-    const info = db.prepare(sql).run(body.name)
-    
-    const newRole = db.prepare('SELECT * FROM roles WHERE id = ?').get(info.lastInsertRowid)
-    return c.json({ message: 'Role created', data: newRole }, 201)
-  } catch (err) {
-    return c.json({ message: 'Error creating role', error: err }, 500)
+    const query = db.prepare('INSERT INTO roles (name) VALUES (?)').run(name)
+    return c.json({
+      success: true,
+      message: "บันทึกข้อมูลเรียบร้อย",
+      id: query.lastInsertRowid
+    }, 201)
+  } catch (error: any) {
+    if (error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+      return c.json({ success: false, message: "ชื่อนี้มีอยู่ในระบบแล้ว" }, 400)
+    }
+    return c.json({ success: false, message: "เกิดข้อผิดพลาดในการบันทึก" }, 500)
   }
 })
 
-// 4. Update role
-rolesRoutes.put('/:id', zValidator('json', createRoleSchema), (c) => {
+// [PUT] แก้ไขข้อมูล
+api.put('/:id', zValidator('json', roleSchema), (c) => {
   const id = c.req.param('id')
-  const body = c.req.valid('json')
+  const { name } = c.req.valid('json')
   
-  const sql = 'UPDATE roles SET name = ? WHERE id = ?'
-  const info = db.prepare(sql).run(body.name, id)
-
-  if (info.changes === 0) {
-    return c.json({ message: 'Role not found' }, 404)
+  const result = db.prepare('UPDATE roles SET name = ? WHERE id = ?').run(name, id)
+  
+  if (result.changes === 0) {
+    return c.json({ success: false, message: "ไม่พบข้อมูลที่ต้องการแก้ไข" }, 404)
   }
-  return c.json({ message: 'Role updated' })
+  return c.json({ success: true, message: "แก้ไขข้อมูลสำเร็จ" })
 })
 
-// 5. Delete role
-rolesRoutes.delete('/:id', (c) => {
+// [DELETE] ลบข้อมูล
+api.delete('/:id', (c) => {
   const id = c.req.param('id')
-  const info = db.prepare('DELETE FROM roles WHERE id = ?').run(id)
-
-  if (info.changes === 0) {
-    return c.json({ message: 'Role not found' }, 404)
+  try {
+    const result = db.prepare('DELETE FROM roles WHERE id = ?').run(id)
+    if (result.changes === 0) return c.json({ message: "ไม่พบ ID นี้" }, 404)
+    return c.json({ success: true, message: "ลบข้อมูลสำเร็จ" })
+  } catch (error) {
+    return c.json({ success: false, message: "ไม่สามารถลบได้เนื่องจากข้อมูลมีการใช้งานอยู่" }, 400)
   }
-  return c.json({ message: 'Role deleted' })
 })
 
-export default rolesRoutes
+export default api

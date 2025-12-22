@@ -1,24 +1,28 @@
-### Get All Roles
+### 1. เรียกดูรายชื่อบทบาททั้งหมด
 GET http://localhost:3000/api/roles
+Accept: application/json
 
-### Create New Role
+### ---------------------------------------
+
+### 2. เพิ่มบทบาทใหม่ (พิมพ์เองเพื่อป้องกัน Error)
 POST http://localhost:3000/api/roles
 Content-Type: application/json
 
 {
-    "name": "Admin"
+  "name": "Akharacha_Admin"
 }
 
-### Get Role by ID (เปลี่ยนเลข ID ตามจริง)
-GET http://localhost:3000/api/roles/1
+### ---------------------------------------
 
-### Update Role
+### 3. แก้ไขข้อมูล (ระบุ ID ที่ต้องการเปลี่ยน)
 PUT http://localhost:3000/api/roles/1
 Content-Type: application/json
 
 {
-    "name": "Super Admin"
+  "name": "Admin_Pro"
 }
 
-### Delete Role
-DELETE http://localhost:3000/api/roles/1
+### ---------------------------------------
+
+### 4. ลบข้อมูลออกจากระบบ
+DELETE http://localhost:3000/api/roles/3

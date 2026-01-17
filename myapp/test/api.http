@@ -26,7 +26,7 @@ POST http://localhost:3000/users
 Content-Type: application/json
 
 {
-  "Username": "opezare",
+  "Username": "Akharacha",
   "RoleID": 1
 }
 

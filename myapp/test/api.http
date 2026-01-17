@@ -1,28 +1,81 @@
-### 1. เรียกดูรายชื่อบทบาททั้งหมด
-GET http://localhost:3000/api/roles
-Accept: application/json
+################################
+### ROLES
+################################
 
-### ---------------------------------------
-
-### 2. เพิ่มบทบาทใหม่ (พิมพ์เองเพื่อป้องกัน Error)
-POST http://localhost:3000/api/roles
+### CREATE ROLE
+POST http://localhost:3000/roles
 Content-Type: application/json
 
 {
-  "name": "Akharacha_Admin"
+  "RoleName": "Admin"
 }
 
-### ---------------------------------------
+###
 
-### 3. แก้ไขข้อมูล (ระบุ ID ที่ต้องการเปลี่ยน)
-PUT http://localhost:3000/api/roles/1
+### GET ALL ROLES
+GET http://localhost:3000/roles
+
+###
+
+################################
+### USERS
+################################
+
+### CREATE USER
+POST http://localhost:3000/users
 Content-Type: application/json
 
 {
-  "name": "Admin_Pro"
+  "Username": "opezare",
+  "RoleID": 1
 }
 
-### ---------------------------------------
+###
 
-### 4. ลบข้อมูลออกจากระบบ
-DELETE http://localhost:3000/api/roles/3
+### GET ALL USERS
+GET http://localhost:3000/users
+
+###
+
+################################
+### HOSPITAL ROOMS
+################################
+
+### CREATE ROOM
+POST http://localhost:3000/rooms
+Content-Type: application/json
+
+{
+  "RoomNumber": "101",
+  "Type": "ICU",
+  "Capacity": 2,
+  "Status": "Available"
+}
+
+###
+
+### GET ALL ROOMS
+GET http://localhost:3000/rooms
+
+###
+
+### GET ROOM BY ID
+GET http://localhost:3000/rooms/1
+
+###
+
+### UPDATE ROOM
+PUT http://localhost:3000/rooms/1
+Content-Type: application/json
+
+{
+  "RoomNumber": "101",
+  "Type": "ICU",
+  "Capacity": 2,
+  "Status": "Occupied"
+}
+
+###
+
+### DELETE ROOM
+DELETE http://localhost:3000/rooms/1

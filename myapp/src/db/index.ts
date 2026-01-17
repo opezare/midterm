@@ -1,14 +1,7 @@
-import Database from 'better-sqlite3';
+import sqlite3 from "sqlite3";
+import { open } from "sqlite";
 
-async function initializeDatabase() {
-    // สร้างการเชื่อมต่อฐานข้อมูล SQLite
-    // หากไฟล์ฐานข้อมูลยังไม่มี จะถูกสร้างขึ้นใหม่
-    
-    const option = { verbose: console.log };
-    const db = new Database('app.db', option);
-    return db;
-}
-
-const db = await initializeDatabase();
-
-export default db;
+export const dbPromise = open({
+  filename: "app.db",
+  driver: sqlite3.Database,
+});
